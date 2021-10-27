@@ -1,1 +1,5 @@
-<p>gallery works!</p>
+<div class="photos-list">
+  <div *ngFor="let photo of photosList" class="photo">
+      <app-photo-container [photo]="photo"></app-photo-container>
+  </div>
+</div>
