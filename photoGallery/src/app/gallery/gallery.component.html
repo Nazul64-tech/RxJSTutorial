@@ -1,5 +1,5 @@
 <div class="photos-list">
-  <div *ngFor="let photo of photosList" class="photo">
+  <div *ngFor="let photo of photosList$ | async" class="photo">
       <app-photo-container [photo]="photo"></app-photo-container>
   </div>
 </div>

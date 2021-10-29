@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest, Observable, of, Subject } from 'rxjs';
+import { map, scan, startWith, withLatestFrom } from 'rxjs/operators';
 import propEq from 'ramda/es/propEq';
 import { Photo } from '../interfaces/photo';
+import { flatten } from '@angular/compiler';
 
 const initialPhotos: Photo[] = [
   {
@@ -46,12 +47,28 @@ const initialPhotos: Photo[] = [
   providedIn: 'root'
 })
 export class PhotosService {
-  photos: Photo[] = initialPhotos;
+  constructor(
+  ) { }
+
+  private photos: Photo[] = initialPhotos
+
+  newPhotos$ = new Subject()
+
+  private allNewPhotos$ = this.newPhotos$.pipe(
+      scan((allNewPhotos, newPhotos) => allNewPhotos.concat(newPhotos), []),
+      startWith([]),
+  )
+
+  photos$ = combineLatest([of(this.photos), this.allNewPhotos$]).pipe(map(flatten))
+
   noPhotoID = ""
   activePhotoID$ = new BehaviorSubject(this.noPhotoID)
-  activePhoto$: Observable<Photo | undefined> = this.activePhotoID$.pipe(
-    map(photoID => this.photos.find(propEq("id", photoID)))
-  );
 
-  constructor() { }
+  findPhotoByID = (photos: Photo[], photoID: string) =>
+      photos.find(propEq("id", photoID))
+
+  activePhoto$: Observable<Photo | undefined> = this.activePhotoID$.pipe(
+      withLatestFrom(this.photos$),
+      map(([photoID, photos]) => this.findPhotoByID(photos, photoID)),
+  )
 }

@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Observable } from 'rxjs';
 import { Photo } from '../interfaces/photo';
 import { PhotosService } from '../services/photo-service.service'
 
@@ -8,7 +9,7 @@ import { PhotosService } from '../services/photo-service.service'
   styleUrls: ['./gallery.component.scss']
 })
 export class GalleryComponent implements OnInit {
-  photosList: Photo[] = this.photosService.photos;
+  photosList$: Observable<Photo[]> = this.photosService.photos$;
 
   constructor(private photosService: PhotosService) { }
 

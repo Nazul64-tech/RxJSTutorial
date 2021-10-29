@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Component, OnDestroy } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { Photo } from '../interfaces/photo';
 import { PhotosService } from '../services/photo-service.service';
 
@@ -8,16 +8,23 @@ import { PhotosService } from '../services/photo-service.service';
   templateUrl: './active-photo.component.html',
   styleUrls: ['./active-photo.component.scss']
 })
-export class ActivePhotoComponent implements OnInit {
-  activePhoto$: Observable<Photo | undefined> = this.photosService.activePhoto$;
+export class ActivePhotoComponent implements OnDestroy {
+  photo: Photo | undefined;
 
-  constructor(private photosService: PhotosService) { }
+  photoSubscription: Subscription =
+      this.photosService.activePhoto$.subscribe(photo => {
+          this.photo = photo
+      })
 
-  ngOnInit(): void {
-  }
+  constructor(
+      private photosService: PhotosService,
+  ) { }
 
   hidePhoto() {
-    this.photosService.activePhotoID$.next(this.photosService.noPhotoID);
+      this.photosService.activePhotoID$.next(this.photosService.noPhotoID);
   }
 
+  ngOnDestroy() {
+      this.photoSubscription.unsubscribe()
+  }
 }
